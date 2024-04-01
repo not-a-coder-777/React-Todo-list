@@ -1,0 +1,99 @@
+
+-Docker installation
+sudo apt-get update
+sudo apt-get install docker.io -y
+sudo usermod -aG docker $USER
+sudo reboot
+-Cloning the code from repository
+git clone https://github.com/not-a-coder-777/React-Todo-list.git
+ls 
+cd React-Todo-list
+cat Dockerfile
+
+FROM node:13.12.0-alpine
+
+WORKDIR /app
+
+COPY package.json ./
+COPY package-lock.json ./
+RUN npm install
+
+COPY . ./
+
+EXPOSE 3000
+
+
+CMD ["npm", "start"]
+
+
+-Building docker image from the dockerfile:
+
+docker build . -t react-app2:latest
+
+-Running the application on the docker container to check whether the app works or not.
+
+docker run -d -p 3000:3000 react-app2:latest
+
+docker kill container-id
+
+-Pushing image to the DockerHub
+
+docker login
+enter username
+enter password
+once logged in tag the image so that it can be pushed to DockerHub
+docker tag react-app2 norolemodel/react-app2
+docker push norolemodel/react-app2:latest
+ 
+In the next step,minikube has been installed to set up our kubernetes cluster
+
+Setting up minikube on AWS-EC2 instance
+
+  #!/bin/bash
+  sudo su
+  apt update
+  apt -y install docker.io
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin/kubectl
+  curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+  apt install conntrack
+
+
+
+we already have or image uploaded at https://hub.docker.com/repository/docker/norolemodel/react-app2
+
+-Deploy a pod with the react-app2 image
+
+  kubectl run react-todo-app --image=norolemodel/react-app2
+
+-Deploy a NodePort service for this pod
+
+
+  kubectl expose pod react-todo-app --type=NodePort --port=3000 --name=react-todo-app-service
+    
+- Checking if the service is working or not	
+	minikube service react-todo-app-service --url
+	
+  curl <url>
+  
+  
+- To access service from the outside, I made sure that I've enabled port 3000 for ingress traffic in AWS Instance security group.
+
+- Now I have used kubectl port-forward to forward the traffic from 3000 port to 3000 port on our pod.
+
+  kubectl port-forward svc/react-todo-app-service 3000:3000 --address 0.0.0.0 &
+  
+- Pasted public ip address of my instance on my browser
+http://52.91.233.149:3000/
+
+where the app was accessible
+
+
+
+ 
+
+
+
+
+
+
+
